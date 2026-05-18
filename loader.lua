@@ -1,15 +1,12 @@
--[[
+--[[
     STEAL A BRAINROT HUB
     Created by: dimitar26052009-cloud
     Version: 1.0
-    
-    How to use:
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/dimitar26052009-cloud/StealABrainrotHub/main/loader.lua"))()
 ]]
 
-print("="*60)
+print("============================================================")
 print("STEAL A BRAINROT HUB - Loading...")
-print("="*60)
+print("============================================================")
 
 -- Check if correct game
 local PlaceId = game.PlaceId
@@ -17,8 +14,8 @@ local GAME_ID = 109983668079237
 
 if PlaceId ~= GAME_ID then
     warn("[SAB HUB] Wrong game! This hub is for Steal a Brainrot only.")
-    warn("[SAB HUB] Current PlaceID:", PlaceId)
-    warn("[SAB HUB] Required PlaceID:", GAME_ID)
+    warn("[SAB HUB] Current PlaceID: " .. PlaceId)
+    warn("[SAB HUB] Required PlaceID: " .. GAME_ID)
     return
 end
 
@@ -30,68 +27,99 @@ end
 
 _G.SABHub = true
 
--- Initialize global settings
-_G.SABSettings = {
-    version = "1.0",
-    premium = false,
-    
-    -- ESP Settings
-    esp = {
-        enabled = false,
-        showConveyor = true,
-        showBases = true,
-        showBrainrots = true,
-        showDistance = true
-    },
-    
-    -- Auto Buy Settings
-    autoBuy = {
-        enabled = false,
-        rarities = {"Secret", "OG", "Brainrot God"},
-        maxPrice = 100000000000, -- 100B
-        mutations = {},
-        minValue = 0
-    },
-    
-    -- Auto Steal Settings (Premium)
-    autoSteal = {
-        enabled = false,
-        minValue = 50000000, -- 50M
-        rarities = {"Secret", "OG", "Brainrot God"},
-        whitelist = {},
-        safeMode = true,
-        delay = 15 -- seconds between steals
-    },
-    
-    -- Movement Settings
-    movement = {
-        speed = 16,
-        fly = false,
-        noclip = false
-    }
-}
+print("[SAB HUB] Loading UI Library...")
 
--- Load UI Library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+-- Load Orion UI Library (more reliable)
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
 -- Create Window
-local Window = Library.CreateLib("STEAL A BRAINROT HUB", "Ocean")
+local Window = OrionLib:MakeWindow({
+    Name = "Steal a Brainrot Hub",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "SABHub"
+})
 
-print("[SAB HUB] UI Library loaded")
+print("[SAB HUB] UI Library loaded!")
 
--- Load main GUI
-local success, err = pcall(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/dimitar26052009-cloud/StealABrainrotHub/main/ui/main_gui.lua"))()
-end)
+-- Home Tab
+local HomeTab = Window:MakeTab({
+    Name = "Home",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-if not success then
-    warn("[SAB HUB] Failed to load main GUI:", err)
-    return
-end
+HomeTab:AddLabel("Steal a Brainrot Hub v1.0")
+HomeTab:AddLabel("Created by: dimitar26052009-cloud")
+HomeTab:AddLabel("Press RIGHT CTRL to toggle UI")
+
+local player = game.Players.LocalPlayer
+
+-- Movement Tab
+local MovementTab = Window:MakeTab({
+    Name = "Movement",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+MovementTab:AddSlider({
+    Name = "Walk Speed",
+    Min = 16,
+    Max = 500,
+    Default = 16,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "Speed",
+    Callback = function(Value)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = Value
+        end
+    end    
+})
+
+MovementTab:AddToggle({
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        _G.InfiniteJump = Value
+        
+        if Value then
+            game:GetService("UserInputService").JumpRequest:connect(function()
+                if _G.InfiniteJump and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:ChangeState("Jumping")
+                end
+            end)
+        end
+    end    
+})
+
+-- ESP Tab
+local ESPTab = Window:MakeTab({
+    Name = "ESP",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+ESPTab:AddLabel("ESP features coming soon!")
+ESPTab:AddLabel("Will show brainrots on conveyor")
+ESPTab:AddLabel("Will show player bases")
+
+-- Settings Tab
+local SettingsTab = Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+SettingsTab:AddButton({
+    Name = "Destroy GUI",
+    Callback = function()
+        OrionLib:Destroy()
+    end    
+})
 
 print("[SAB HUB] ✓ Loaded successfully!")
-print("[SAB HUB] Press RIGHT SHIFT to toggle UI")
-print("="*60)
+print("[SAB HUB] Press RIGHT CTRL to toggle UI")
+print("============================================================")
 
--- Store window globally
-_G.SABWindow = Window
+OrionLib:Init()
